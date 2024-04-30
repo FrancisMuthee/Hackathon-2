@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from django.urls import path, include
 
 load_dotenv()
 
@@ -41,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'aries'
+    'aries',
+    'accounts'
 ]
 
 MIDDLEWARE = [
