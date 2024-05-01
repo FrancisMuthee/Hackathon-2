@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from django.urls import path, include
+from dotenv import setVar
+
 
 
 
@@ -132,6 +134,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'myprojstatic')]
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
