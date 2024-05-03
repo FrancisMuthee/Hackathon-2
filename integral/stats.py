@@ -1,5 +1,5 @@
 import pandas as pd
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 from datetime import datetime
 import time
 
@@ -162,4 +162,40 @@ print(new_epoch)
 
 #A histogram is a graph used to represent the frequency distribution of a few data points of one variable
  
+# ages = [18,21,25,24,26,27,29,35,41,23,55]
+# bins = [10,20,30,40,50,60]
+
+# plt.hist(ages, bins=bins, edgecolor='black')
+# plt.title('Age of respondent')
+# plt.xlabel('ages')
+# plt.ylabel('Total respondents')
+# plt.show()
+
+data4 = pd.read_csv(r"C:\Users\pc\Desktop\RR\stackkoverflow.csv")
+print(data4.head())
+print(data4.describe())
+#        Responder_id           Age
+# count  79210.000000  79210.000000
+# mean   44428.782073     30.336675
+# std    25676.792133      9.178419
+# min        1.000000      1.000000
+# 25%    22166.250000     24.000000
+# 50%    44435.500000     29.000000
+# 75%    66672.750000     35.000000
+# max    88883.000000     99.000000
+ids=data4['Responder_id']
+ages=data4['Age']
+bins = [10,20,30,40,50,60,70,80,90,100]
+plt.hist(ages, bins=bins, edgecolor='black', log=True)
+
+median_age =29
+plt.axvline(median_age, color='red', label= 'age median', linewidth=2)
+plt.title('Age of respondent')
+plt.xlabel('ages')
+plt.ylabel('Total respondents')
+plt.show()
+
+
+
+
 
