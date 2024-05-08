@@ -16,7 +16,6 @@ import pylab
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-import autofit
 
 
 from sklearn.linear_model import LinearRegression
@@ -199,18 +198,18 @@ print(Data1.head())
 #    5%: -2.865007578546518
 #    10%: -2.5686164240381513
 
-# mul_decompose = seasonal_decompose(Data1['Price'], model='multiplicative', extrapolate_trend='freq')
-# add_decompose = seasonal_decompose(Data1['Price'], model='additive', extrapolate_trend='freq')
-# # mul_decompose.plot()
-# # plt.show()
-# add_decompose.plot()
+mul_decompose = seasonal_decompose(Data1['Price'], model='multiplicative', extrapolate_trend='freq')
+add_decompose = seasonal_decompose(Data1['Price'], model='additive', extrapolate_trend='freq')
+# mul_decompose.plot()
 # plt.show()
-
-diff_ts = Data1['Price'].diff().dropna()
-# print(diff_ts)
-# diff_ts.plot()
-plot_pacf(diff_ts, lags=10)
+add_decompose.plot()
 plt.show()
+
+# diff_ts = Data1['Price'].diff().dropna()
+# # print(diff_ts)
+# # diff_ts.plot()
+# plot_pacf(diff_ts, lags=10)
+# plt.show()
 # plt.show()
 # result2 = adfuller(diff_ts)
 # print('ADF Statistic:', result2[0])
