@@ -30,60 +30,74 @@ print(kasa2.head())
 #checking the no. of null values
 print(kasa2.isna().sum())
 
-
-# kasa2.plot()
-# plt.show()
+#Raw plotting
+kasa2.plot()
+plt.savefig("Raw data.png")
+plt.show()
 
 #Performing a descriptive statistics
 print(kasa2.describe())
 
 #Plotting a histogram of the distribution.
+bins = [10,20,30,40,50,60,70,80,90]
+plt.hist(kasa2.Records, bins=bins, edgecolor='black')
+plt.title('Histogram for the records of crime')
+plt.xlabel('year/months')
+plt.ylabel("counts")
+plt.savefig("Raw histogram.png")
+plt.show()
 
-# bins = [10,20,30,40,50,60,70,80,90]
-# plt.hist(kasa2.Records, bins=bins, edgecolor='black')
-# plt.title('Histogram for the records of crime')
-# plt.xlabel('year/months')
-# plt.ylabel("counts")
-# plt.show()
-
-# print(kasa2.Records.corr())
 
 #QQ plot
 #To determine the distribution of the sample. The points should follow a normal distribution.
 #Or a y=x
-# fit = scipy.stats.probplot(kasa2.Records, plot=pylab) 
-# plt.savefig("qq.png")
-# pylab.show()
+fit = scipy.stats.probplot(kasa2.Records, plot=pylab) 
+plt.savefig("rawqq.png")
+pylab.show()
 
 
-#Unit-root test
-# Unit root is a characteristic of a time series that makes it non-stationary.Its presence signifies non-stationarity.
-#The ADF , is used to check staionarity. if the 
-# result = adfuller(kasa2['Records'])
-# print('ADF Statistic:', result[0])
-# print('p-value:', result[1])
-# print('Critical Values:')
-# for key, value in result[4].items():
-#         print(f'   {key}: {value}')
+#Stationarity
+# Stationarity: Stationarity means that the statistical properties (mean, variance...) remain constant over time, so time series with trends or seasonality are not stationary.
+# Since ARIMA assumes the stationarity of the data, it is essential to subject the data to rigorous tests, such as the Augmented Dickey-Fuller test, to assess stationarity. 
+# If non-stationarity is found, the series should be differenced until stationarity is achieved. This analysis helps to determine the optimal value of the parameter  d
 
-        # ADF Statistic: -3.546552929508487
-        # p-value: 0.006868978424718734
-        # Critical Values:
-        # 1%: -3.5463945337644063
-        # 5%: -2.911939409384601
-        # 10%: -2.5936515282964665
-#The p-value is less than 0.05 therefore we rejext the null hypothesis and hence the series is stationary.
-
-
-#Extract time series data
+#Extract time series data by first differencing.
 ts_data = kasa2['Records']
 ts_data_diff = ts_data.diff().dropna()
+diff2 = seasonal_decompose(ts_data_diff, model='additive', extrapolate_trend='freq')
+diff2.plot()
+plt.savefig("diff2.png")
+plt.show()
 
 
-# ts_data_diff.plot()
-# plt.save.fig("diff1.png")
-# plt.show()
+ts_data_diff.plot()
+plt.savefig("diff1.png")
+plt.show()
 
+
+add_decompose = seasonal_decompose(
+ts_data_diff, 
+model='additive', 
+extrapolate_trend='freq'
+ )
+add_decompose.plot()
+plt.savefig("trends.png")
+plt.show()
+
+residuals = add_decompose.resid
+plot_pacf(residuals, lags=20, zero=False)
+plt.savefig("resid.png")
+plt.show()
+
+fit = scipy.stats.probplot(ts_data_diff, plot=pylab) 
+plt.savefig("qqdiff.png")
+pylab.show()
+
+
+
+
+#ADF test
+#Signifies the data is stationery as p-value < 0.05
 result = adfuller(ts_data_diff)
 print('ADF Statistic:', result[0])
 print('p-value:', result[1])
@@ -101,6 +115,7 @@ for key, value in result[4].items():
 # The more negative the ADF statistic, the stronger the evidence against the presence of a unit root, indicating a more stationary series.
 
 
+#Auto-fitting the model
 best_aic = float('inf')
 best_order = None
 best_model = None
@@ -123,7 +138,7 @@ print(f'Best ARIMA{best_order} AIC: {best_aic}')
 coefficients = model_fit.params
 print(coefficients)
 
-
+#Model coefficients
 
 # Best ARIMA(1, 0, 1) AIC: 467.4196792736337
 # ar.L1      -2.093387
@@ -136,71 +151,10 @@ print(coefficients)
 # ma.L4       0.989880
 # sigma2    150.750160
 
-# Invert differencing to get back to the original scale
-# forecasted_values = model_fit.forecast(steps=len(ts_data_diff))
-# forecasted_values = np.cumsum(forecasted_values)  # Cumulative sum to invert differencing
-
-# # Plotting
-# plt.figure(figsize=(10, 6))
-# plt.plot(ts_data.index, ts_data.values, label='Actual', marker='o')
-# plt.plot(ts_data_diff.index, ts_data_diff.values, label='Differenced Actual', marker='o')
-# plt.plot(forecasted_values.index, forecasted_values, label='Forecasted', marker='o')
-# plt.xlabel('Date')
-# plt.ylabel('Value')
-# plt.title('Actual vs. Forecasted Values')
-# plt.legend()
-# plt.xticks(rotation=45)
-# plt.tight_layout()
-# plt.savefig("All_in_one.png")
-# plt.show()
-
-
-# Forecast future time periods
-# forecast_steps = 10  # Change this according to the number of steps you want to forecast
-# forecast = model_fit.forecast(steps=forecast_steps)
-# # # Print forecasted values
-# print("Forecasted Values:")
-# print(forecast)
-# forecast.plot()
-# plt.savefig("forecast.png")
-# plt.show()
-
-# Forecasted Values:
-# 2023-01-01    12.130980
-# 2023-02-01     1.714990
-# 2023-03-01     0.999115
-# 2023-04-01    -0.924260
-# 2023-05-01     5.201934
-# 2023-06-01    -2.415409
-# 2023-07-01     5.208957
-# 2023-08-01    -1.593135
-# 2023-09-01     4.306745
-# 2023-10-01    -0.280563
-
-# add_decompose = seasonal_decompose(
-# ts_data_diff, 
-# model='additive', 
-# extrapolate_trend='freq'
-#  )
-# residuals = add_decompose.resid
-# plot_pacf(residuals, lags=20, zero=False)
-# plt.show()
-# add_decompose.plot()
-# plt.show()
-# fit = scipy.stats.probplot(ts_data_diff, plot=pylab) 
-# plt.savefig("qq3.png")
-# pylab.show()
-# residuals = add_decompose.resid
-# residuals = add_decompose.resid
-# print(residuals)
-# residuals.plot()
-# plt.show()
-
-
 # Fit ARIMA model
-# model = ARIMA(ts_data_diff)
-# fitted_model = model.fit()
-# print(fitted_model.summary())
+model = ARIMA(ts_data_diff)
+fitted_model = model.fit()
+print(fitted_model.summary())
 
                             #  SARIMAX Results
 # ==============================================================================
@@ -223,23 +177,56 @@ print(coefficients)
 # Prob(H) (two-sided):                  0.11   Kurtosis:                         3.09
 # ===================================================================================
 
+# Model Fit Statistics: This part includes several statistics that help you evaluate how well the model fits the data:
 
+# Log-Likelihood: A measure of how well the model explains the observed data. When fitting an ARIMA model, negative log-likelihood values will be encounter,
+#  with more negative values indicating a poorer fit to the data, and values closer to zero indicating a better fit.
 
+# AIC (Akaike Information Criterion): A goodness-of-fit metric that balances the fit of the model with its complexity. Lower AIC values are preferred.
 
+# BIC (Bayesian Information Criterion): Similar to AIC, but penalizes model complexity more. As with AIC, lower BIC values are better.
 
+# HQIC (Hannan-Quinn Information Criterion): Another model selection criterion, similar to AIC and BIC.
 
-# plt.hist(residuals, bins=30, color='skyblue', edgecolor='black')
-# plt.show()
+# Ljung-Box test: A test for autocorrelation in the residuals.
+
+# Jarque-Bera test: A test of the normality of the residuals.
+
+# Skewness and kurtosis: Measures of the shape of the distribution of the residuals.
+
+# Invert differencing to get back to the original scale
+forecasted_values = model_fit.forecast(steps=len(ts_data_diff))
+forecasted_values = np.cumsum(forecasted_values)  # Cumulative sum to invert differencing
 
 # Forecast future time periods
-# forecast_steps = 12  # Change this according to the number of steps you want to forecast
-# forecast = model_fit.forecast(steps=forecast_steps)
-
+forecast_steps = 10  # Change this according to the number of steps you want to forecast
+forecast = model_fit.forecast(steps=forecast_steps)
 # # Print forecasted values
-# print("Forecasted Values:")
-# print(forecast)
-# forecast.plot()
-# plt.show()
+# # Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(ts_data.index, ts_data.values, label='Actual', marker='o')
+plt.plot(ts_data_diff.index, ts_data_diff.values, label='Differenced Actual', marker='o')
+plt.plot(forecasted_values.index, forecasted_values, label='Forecasted', marker='o')
+plt.xlabel('Date')
+plt.ylabel('Value')
+plt.title('Actual vs. Forecasted Values')
+plt.legend()
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig("All_in_one.png")
+plt.show()
+
+# Forecasted Values:
+# 2023-01-01    12.130980
+# 2023-02-01     1.714990
+# 2023-03-01     0.999115
+# 2023-04-01    -0.924260
+# 2023-05-01     5.201934
+# 2023-06-01    -2.415409
+# 2023-07-01     5.208957
+# 2023-08-01    -1.593135
+# 2023-09-01     4.306745
+# 2023-10-01    -0.280563
 
 
 
@@ -248,8 +235,9 @@ print(coefficients)
 Before_covid = kasa2['2018-01-01':'2019-12-12']
 sum_total = Before_covid['Records'].sum()
 
-# Before_covid.boxplot(column='Records')
-# plt.show()
+Before_covid.boxplot(column='Records')
+plt.savefig("Beforecovid.png")
+plt.show()
 
 print("Total sum of values for the time before covid-19:",  sum_total)
 #Total sum of values for the time before covid-19: 868
@@ -258,12 +246,13 @@ After_covid = kasa2['2020-01-01':'2022-12-12']
 sum_total2= After_covid['Records'].sum()
 
 After_covid.boxplot(column='Records')
+plt.savefig("aftercovid.png")
 plt.show()
 
 print("Total sum of values for the time after covid-19:",  sum_total2)
 #Total sum of values for the time after covid-19: 1609
 
-
+print("The boxplots help assess the differences between before and after the pandemic. It's quite noticeable that the after group had a higher median value and IQR than the before group.")
 
 
 
