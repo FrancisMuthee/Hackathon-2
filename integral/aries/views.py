@@ -11,21 +11,21 @@ def index(request):
         email = request.POST.get('email')
         message = request.POST.get('message')
 
-        connection= get_connection()
-        connection.open()
-        email1 = EmailMessage(
-            "Hello",
-            "Is everything OK?"
-            "francisnjaramba2@gmail.com",
-            ["reddmarx01@gmail.com"],
-            connection=connection,
-        )
-        email1.send()
-        connection.close()
+    #     connection= get_connection()
+    #     connection.open()
+    #     email1 = EmailMessage(
+    #         "Hello",
+    #         "Is everything OK?"
+    #         "francisnjaramba2@gmail.com",
+    #         ["reddmarx01@gmail.com"],
+    #         connection=connection,
+    #     )
+    #     email1.send()
+    #     connection.close()
 
-        return HttpResponse('email sent successfully')
-    else:
+    #     return HttpResponse('email sent successfully')
+    # else:
 
-        return render(request, 'home.html')
+    #     return render(request, 'home.html')
 
 
